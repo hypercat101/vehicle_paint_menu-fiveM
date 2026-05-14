@@ -1,6 +1,6 @@
 lib = lib or exports.ox_lib
 
-local chameleonPresets = {
+local paintPresets = {
     { label = "Sunrise Glow",    r = 255, g = 94,  b = 77  },
     { label = "Minty Fresh",     r = 102, g = 255, b = 178 },
     { label = "Electric Purple", r = 179, g = 0,   b = 255 },
@@ -39,7 +39,7 @@ local function openPaintMenu(vehicle)
                 description = 'Choose from custom presets',
                 onSelect = function()
                     local options = {}
-                    for _, preset in ipairs(chameleonPresets) do
+                    for _, preset in ipairs(paintPresets) do
                         options[#options+1] = {
                             title = preset.label,
                             onSelect = function()
@@ -49,14 +49,12 @@ local function openPaintMenu(vehicle)
                             end
                         }
                     end
-
                     lib.registerContext({
-                        id      = 'preset_menu',
-                        title   = 'Preset Colors',
-                        menu    = 'paint_menu',
+                        id = 'preset_colors',
+                        title = 'Preset Colors',
                         options = options
                     })
-                    lib.showContext('preset_menu')
+                    lib.showContext('preset_colors')
                 end
             }
         }
@@ -64,27 +62,15 @@ local function openPaintMenu(vehicle)
     lib.showContext('paint_menu')
 end
 
-local function setupPaintTarget()
-    exports.ox_target:addGlobalVehicle({
-        {
-            label = 'Paint Vehicle',
-            icon  = 'fa-solid fa-spray-can',
-            canInteract = function(entity)
-                return DoesEntityExist(entity) and GetVehiclePedIsIn(cache.ped, false) == 0
-            end,
-            onSelect = function(data)
-                openPaintMenu(data.entity)
-            end
-        }
-    })
-end
-
-CreateThread(setupPaintTarget)
-
 RegisterNetEvent('paint:applyColor', function(netId, r, g, b)
-    local veh = NetToVeh(netId)
-    if DoesEntityExist(veh) then
-        SetVehicleCustomPrimaryColour(veh, r, g, b)
-        SetVehicleCustomSecondaryColour(veh, r, g, b)
+    local vehicle = NetToVeh(netId)
+    if DoesEntityExist(vehicle) then
+        SetVehicleCustomPrimaryColour(vehicle, r, g, b)
+        SetVehicleCustomSecondaryColour(vehicle, r, g, b)
     end
+end)
+
+AddEventHandler('onResourceStart', function(resourceName)
+    if GetCurrentResourceName() ~= resourceName then return end
+    print('Paint menu client script loaded.')
 end)
